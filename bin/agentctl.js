@@ -90,6 +90,10 @@ async function cmdStart(flags) {
   const persist = !!flags.persist;
   const basePath = flags['base-path'] || undefined;
 
+  // AgentAuth sidecar config
+  const agentauthConfig = flags['agentauth-config'] || process.env.AGENTAUTH_CONFIG || null;
+  const agentauthPort = parseInt(flags['agentauth-port'] || process.env.AGENTAUTH_PORT || '9999');
+
   // Choose bus
   let messageBus;
   if (server) {
@@ -112,6 +116,7 @@ async function cmdStart(flags) {
     basePath,
     messageBus,
     repo: flags.repo || null,
+    agentauth: agentauthConfig ? { configPath: agentauthConfig, port: agentauthPort } : null,
     tokenBudget: parseInt(flags['token-budget'] || '0'),
     heartbeatIntervalMs: parseInt(flags['heartbeat-interval'] || '30000'),
     maxTaskDurationMs: parseInt(flags['max-task-duration'] || '1800000'),
@@ -270,6 +275,8 @@ Start options:
       --token-budget <N>      Total token budget (0 = unlimited)
       --heartbeat-interval <ms>  Heartbeat interval (default: 30000)
       --max-task-duration <ms>   Max task duration (default: 1800000)
+      --agentauth-config <path>  AgentAuth config JSON (enables sidecar)
+      --agentauth-port <port>    AgentAuth proxy port (default: 9999)
       --verbose               Print all log events
 
 Config reload (SIGHUP):
@@ -278,6 +285,8 @@ Config reload (SIGHUP):
 
 Environment:
   AGENTCHAT_SERVER     Default server URL for --server
+  AGENTAUTH_CONFIG     Default config path for --agentauth-config
+  AGENTAUTH_PORT       Default port for --agentauth-port
   AGENTCTL_MAX_ACTIVE  Reload: max active agents
   AGENTCTL_TOKEN_BUDGET  Reload: token budget
   AGENTCTL_HEARTBEAT_INTERVAL  Reload: heartbeat interval (ms)
